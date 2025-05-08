@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Image to XBM Conversion & Download</title>
+<style>
+  /* Style for image display */
+  #imageDisplay {
+    max-width: 100%;
+    max-height: 300px;
+    margin-bottom: 20px;
+  }
+</style>
+</head>
+<body>
+<h1>Image to XBM Conversion & Download</h1>
+<input type="file" id="imageInput">
+<button onclick="convertToXBMAndDownload()">Convert to XBM and Download</button>
+
+<script>
+function convertToXBMAndDownload() {
+    var input = document.getElementById('imageInput');
+    var file = input.files[0];
+
+    if (file) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            var img = new Image();
+            img.onload = function() {
+                var canvas = document.createElement('canvas');
+                var ctx = canvas.getContext('2d');
+
+                canvas.width = img.width;
+                canvas.height = img.height;
+                ctx.drawImage(img, 0, 0);
+
+                // Convert canvas to XBM data
+                var xbmData = convertCanvasToXBM(canvas);
+
+                // Create a download link for the XBM image
+                var downloadLink = document.createElement('a');
+                downloadLink.href = 'data:image/x-xbitmap,' + encodeURIComponent(xbmData);
+                downloadLink.download = 'converted_image.xbm';
+                downloadLink.textContent = 'Download XBM';
+
+                // Display the download link
+                document.body.appendChild(downloadLink);
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    } else {
+        alert('Please select a file.');
+    }
+}
+
+function convertCanvasToXBM(canvas) {
+    var ctx = canvas.getContext('2d');
+    var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+    var width = canvas.width;
+    var height = canvas.height;
+    var xbmData = '';
+
+    // XBM header
+    xbmData += '#define image_width ' + width + '\n';
+    xbmData += '#define image_height ' + height + '\n';
+    xbmData += 'static unsigned char image_bits[] = {\n';
+
+    // XBM pixel data
+    for (var y = 0; y < height; y++) {
+        var line = '   ';
+        for (var x = 0; x < width; x++) {
+            var index = (y * width + x) * 4;
+            var red = imageData[index];
+            var green = imageData[index + 1];
+            var blue = imageData[index + 2];
+            var alpha = imageData[index + 3];
+            var gray = (red + green + blue) / 3;
+            var bit = (gray >= 128) ? 1 : 0;
+            line += (bit == 1) ? '1' : '0';
+            if (x % 8 === 7) {
+                line += ', ';
+            }
+        }
+        if (y < height - 1) {
+            line += '\n';
+        }
+        xbmData += line;
+    }
+
+    // XBM footer
+    xbmData += '};\n';
+
+    return xbmData;
+}
+</script>
+</body>
+</html>

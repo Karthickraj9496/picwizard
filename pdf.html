@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Image to PDF Conversion & Download</title>
+</head>
+<body>
+<h1>Image to PDF Conversion & Download</h1>
+<input type="file" id="imageInput">
+<button onclick="convertToPDFAndDownload()">Convert to PDF and Download</button>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.3/jspdf.umd.min.js"></script>
+<script>
+function convertToPDFAndDownload() {
+    var input = document.getElementById('imageInput');
+    var file = input.files[0];
+
+    if (file) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            var img = new Image();
+            img.onload = function() {
+                var pdf = new jsPDF();
+                var width = pdf.internal.pageSize.getWidth();
+                var height = width * (img.height / img.width);
+
+                pdf.addImage(img, 'JPEG', 0, 0, width, height);
+                pdf.save('converted_image.pdf');
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    } else {
+        alert('Please select a file.');
+    }
+}
+</script>
+</body>
+</html>

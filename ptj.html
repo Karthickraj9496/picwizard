@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PNG to JPG Converter</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin-top: 50px;
+    }
+    input[type="file"] {
+      margin: 20px 0;
+    }
+    canvas {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>Convert PNG to JPG</h1>
+  <input type="file" id="inputImage" accept="image/png">
+  <button id="convertBtn">Convert to JPG</button>
+  <a id="downloadLink" style="display: none;">Download JPG</a>
+  <canvas id="canvas"></canvas>
+
+  <script >
+document.getElementById('convertBtn').addEventListener('click', function() {
+  const file = document.getElementById('inputImage').files[0];
+  if (!file) return alert('Please select a PNG image.');
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const img = new Image();
+    img.onload = function() {
+      const canvas = document.getElementById('canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = img.width;
+      canvas.height = img.height;
+
+      // Fill canvas with white background
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Draw the image onto the canvas
+      ctx.drawImage(img, 0, 0);
+
+      // Convert canvas to JPG Blob
+      canvas.toBlob(function(blob) {
+        const link = document.getElementById('downloadLink');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'converted-image.jpg';
+        link.style.display = 'inline';
+        link.click();
+      }, 'image/jpeg', 1.0);
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+});
+
+</script>
+</body>
+</html>

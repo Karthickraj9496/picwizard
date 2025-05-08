@@ -1,0 +1,41 @@
+<html>
+<body>
+
+<input type="file" id="imageInput" accept="image/*">
+<canvas id="canvas" style="display:none;"></canvas>
+<a id="downloadLink" style="display:none;">Download BMP</a>
+
+<script>
+document.getElementById('imageInput').addEventListener('change', function(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const img = new Image();
+    img.onload = function() {
+      const canvas = document.getElementById('canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx.drawImage(img, 0, 0);
+
+      const raw = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const bmpBinary = convert(raw);
+      const blob = new Blob([bmpBinary], { type: 'image/bmp' });
+
+      const link = document.getElementById('downloadLink');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'image.bmp';
+      link.style.display = 'inline';
+      link.click();
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+});
+
+</script>
+
+</body>
+</html>

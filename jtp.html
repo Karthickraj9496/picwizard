@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Convert JPG to PNG</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+    input, button { margin: 10px; }
+  </style>
+</head>
+<body>
+  <h1>Convert JPG to PNG</h1>
+  <input type="file" id="inputImage" accept="image/jpeg">
+  <button id="convertBtn">Convert to PNG</button>
+  <br>
+  <canvas id="canvas" style="display:none;"></canvas>
+  <a id="downloadLink" style="display:none;">Download PNG</a>
+
+  <script>
+    document.getElementById('convertBtn').addEventListener('click', function() {
+      const file = document.getElementById('inputImage').files[0];
+      if (!file) return alert('Please select an image file.');
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+          const canvas = document.getElementById('canvas');
+          const ctx = canvas.getContext('2d');
+          canvas.width = img.width;
+          canvas.height = img.height;
+          ctx.drawImage(img, 0, 0);
+          
+          canvas.toBlob(function(blob) {
+            const link = document.getElementById('downloadLink');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'converted-image.png';
+            link.style.display = 'inline';
+            link.click();
+          }, 'image/png');
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  </script>
+</body>
+</html>
